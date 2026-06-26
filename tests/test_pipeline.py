@@ -6,11 +6,11 @@ parsing, and validation. Run with: pytest tests/test_pipeline.py
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "app"))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from extractor import extract_text
-from field_extractor import extract_fields
-from validator import validate
+from app.extractor import extract_text
+from app.field_extractor import extract_fields
+from app.validator import validate
 
 SAMPLES = Path(__file__).parent.parent / "sample_resumes"
 

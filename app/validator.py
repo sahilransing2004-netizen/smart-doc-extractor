@@ -14,7 +14,7 @@ more at this stage than marginal accuracy gains from a fancier model.
 
 from dataclasses import dataclass
 
-from field_extractor import ResumeFields
+from .field_extractor import ResumeFields
 
 # Required fields — missing any of these drops the result to "needs_review".
 REQUIRED_FIELDS = ["name", "email"]

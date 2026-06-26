@@ -16,9 +16,9 @@ from pathlib import Path
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 
-from extractor import extract_text
-from field_extractor import extract_fields
-from validator import validate
+from .extractor import extract_text
+from .field_extractor import extract_fields
+from .validator import validate
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
