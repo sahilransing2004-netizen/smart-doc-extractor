@@ -1,21 +1,17 @@
 """
 FastAPI application for smart-doc-extractor.
-
 Exposes a single endpoint: upload a resume PDF, get back structured
 JSON. This wraps extractor.py (text extraction with OCR fallback) and
 field_extractor.py (structured field parsing) behind an HTTP interface.
-
 Run locally with:
     uvicorn app.main:app --reload
 """
-
 import logging
 import tempfile
 from pathlib import Path
-
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
-
+from fastapi.staticfiles import StaticFiles
 from .extractor import extract_text
 from .field_extractor import extract_fields
 from .validator import validate
@@ -32,32 +28,26 @@ app = FastAPI(
 
 MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024  # 10 MB — resumes are small; reject anything absurd
 
-
 @app.get("/health")
 def health_check():
     """Basic liveness check — used by monitoring/orchestration later on."""
     return {"status": "ok"}
 
-
 @app.post("/extract")
 async def extract_resume(file: UploadFile = File(...)):
     """Accepts a single PDF resume, runs it through the extraction
     pipeline, and returns structured fields as JSON."""
-
     if file.content_type != "application/pdf":
         raise HTTPException(
             status_code=400,
             detail=f"Expected a PDF file, got content-type '{file.content_type}'",
         )
-
     contents = await file.read()
     if len(contents) > MAX_FILE_SIZE_BYTES:
         raise HTTPException(status_code=400, detail="File too large (max 10 MB)")
     if len(contents) == 0:
         raise HTTPException(status_code=400, detail="Uploaded file is empty")
 
-    # Write to a temp file because pdfplumber/pytesseract need a real
-    # file path, not an in-memory buffer.
     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
         tmp.write(contents)
         tmp_path = tmp.name
@@ -80,3 +70,6 @@ async def extract_resume(file: UploadFile = File(...)):
         "pages": extraction.pages,
     }
     return JSONResponse(content=response_body)
+
+
+app.mount("/", StaticFiles(directory="app/static", html=True), name="static")
